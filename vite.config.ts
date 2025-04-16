@@ -22,15 +22,17 @@ export default defineConfig({
     },
   },
   server: {
-    // Allow connections from all hosts (needed for Render)
-    host: true,
-    // Use environment variable for port or default to 5173
-    port: Number(process.env.PORT) || 5173,
+    host: '0.0.0.0',
+    port: Number(process.env.PORT) || 3000,
   },
   preview: {
-    // Configuration for preview server (used in production)
-    port: Number(process.env.PORT) || 10000,
     host: '0.0.0.0',
+    port: Number(process.env.PORT) || 3000,
     strictPort: true,
+    allowedHosts: [
+      'qualiver-whatspp-interface.onrender.com',
+      'localhost',
+      '127.0.0.1'
+    ],
   },
 })
