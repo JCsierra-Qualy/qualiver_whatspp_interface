@@ -235,7 +235,7 @@ function App() {
 
   return (
     <div className={`min-h-screen w-full flex flex-col bg-white dark:bg-gray-900 ${darkMode ? 'dark' : ''}`}>
-      <header className="bg-[#004F4F] text-white py-2 shadow-md">
+      <header className="bg-[#004F4F] text-white py-2 shadow-md fixed top-0 left-0 right-0 z-10">
         <div className="w-full px-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <img 
@@ -265,8 +265,8 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1 flex overflow-hidden">
-        <div className="w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-full overflow-y-auto fixed left-0">
+      <main className="flex-1 flex overflow-hidden pt-14">
+        <div className="w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-[calc(100vh-3.5rem)] overflow-y-auto fixed left-0 top-14">
           <ConversationList
             conversations={conversations}
             selectedConversation={selectedConversation}
@@ -274,7 +274,7 @@ function App() {
           />
         </div>
 
-        <div className="flex-1 bg-gray-50 dark:bg-gray-900 ml-80 overflow-y-auto">
+        <div className="flex-1 bg-gray-50 dark:bg-gray-900 ml-80 overflow-y-auto h-[calc(100vh-3.5rem)]">
           {selectedConversation ? (
             <ConversationPanel
               conversation={selectedConversation}
