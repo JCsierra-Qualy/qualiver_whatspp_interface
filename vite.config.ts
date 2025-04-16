@@ -29,7 +29,8 @@ export default defineConfig({
   },
   preview: {
     // Configuration for preview server (used in production)
-    port: Number(process.env.PORT) || 5173,
+    port: 10000,
     host: true,
+    strictPort: true,
   },
 })
