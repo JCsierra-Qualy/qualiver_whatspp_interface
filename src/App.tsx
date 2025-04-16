@@ -266,7 +266,7 @@ function App() {
       </header>
 
       <main className="flex-1 flex overflow-hidden">
-        <div className="w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-full overflow-y-auto fixed left-0">
           <ConversationList
             conversations={conversations}
             selectedConversation={selectedConversation}
@@ -274,7 +274,7 @@ function App() {
           />
         </div>
 
-        <div className="flex-1 bg-gray-50 dark:bg-gray-900">
+        <div className="flex-1 bg-gray-50 dark:bg-gray-900 ml-80 overflow-y-auto">
           {selectedConversation ? (
             <ConversationPanel
               conversation={selectedConversation}
