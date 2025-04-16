@@ -1,13 +1,15 @@
 import { format } from 'date-fns'
 import { Message } from '../types/database.types'
-import { CheckIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline'
+import { CheckIcon, CheckCircleIcon, ExclamationCircleIcon, ChatBubbleLeftIcon, UserIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 
 interface MessageBubbleProps {
   message: Message
-  isBot: boolean
+  senderType: 'bot' | 'user' | 'agent'
 }
 
-export const MessageBubble = ({ message, isBot }: MessageBubbleProps) => {
+export const MessageBubble = ({ message, senderType }: MessageBubbleProps) => {
+  const isSystemMessage = senderType === 'bot' || senderType === 'agent'
+
   const getStatusIcon = () => {
     switch (message.message_status) {
       case 'sent':
@@ -21,11 +23,29 @@ export const MessageBubble = ({ message, isBot }: MessageBubbleProps) => {
     }
   }
 
+  const getIcon = () => {
+    switch (senderType) {
+      case 'bot':
+        return <ChatBubbleLeftIcon className="h-5 w-5" />
+      case 'agent':
+        return <UserGroupIcon className="h-5 w-5" />
+      case 'user':
+        return <UserIcon className="h-5 w-5" />
+      default:
+        return <UserIcon className="h-5 w-5" />
+    }
+  }
+
   return (
-    <div className={`flex ${isBot ? 'justify-end' : 'justify-start'} mb-4 message-bubble`}>
+    <div className={`flex ${isSystemMessage ? 'justify-end' : 'justify-start'} mb-4 message-bubble`}>
+      {!isSystemMessage && (
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-900 dark:text-white">
+          {getIcon()}
+        </div>
+      )}
       <div
         className={`max-w-[70%] rounded-lg p-3 ${
-          isBot
+          isSystemMessage
             ? 'bg-[#004F4F] text-white rounded-br-none'
             : 'bg-gray-light text-gray-dark rounded-bl-none'
         } ${!message.bot_active && message.message_type === 'user' ? 'border-2 border-yellow-500' : ''}`}
@@ -58,6 +78,11 @@ export const MessageBubble = ({ message, isBot }: MessageBubbleProps) => {
           </div>
         )}
       </div>
+      {isSystemMessage && (
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#004F4F] flex items-center justify-center text-white">
+          {getIcon()}
+        </div>
+      )}
     </div>
   )
 } 

@@ -20,9 +20,15 @@ export const ConversationPanel = ({
   onToggleBot,
 }: ConversationPanelProps) => {
   const [newMessage, setNewMessage] = useState('')
-  const messagesEndRef = useRef<HTMLDivElement>(null)
   const [isSending, setIsSending] = useState(false)
   const [isTogglingBot, setIsTogglingBot] = useState(false)
+  const [localBotActive, setLocalBotActive] = useState(conversation.bot_active)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Actualizar el estado local cuando cambia la conversación
+  useEffect(() => {
+    setLocalBotActive(conversation.bot_active)
+  }, [conversation.bot_active])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -38,15 +44,13 @@ export const ConversationPanel = ({
 
     setIsSending(true)
     try {
-      // Primero enviamos el mensaje a través del webhook
       await sendMessageWebhook(
         conversation.id,
         newMessage,
         conversation.phone_number,
-        !conversation.bot_active // true si está en modo manual
+        !localBotActive
       )
       
-      // Luego actualizamos la base de datos
       await onSendMessage(newMessage)
       setNewMessage('')
     } catch (error) {
@@ -60,102 +64,90 @@ export const ConversationPanel = ({
     if (isTogglingBot) return
 
     setIsTogglingBot(true)
+    setLocalBotActive(checked) // Actualizar el estado local inmediatamente para mejor UX
 
     try {
       console.log('Enviando webhook de estado del bot:', {
         conversationId: conversation.id,
         isActive: checked,
         phoneNumber: conversation.phone_number,
-        webhookUrl: import.meta.env.VITE_N8N_BOT_STATUS_WEBHOOK_URL
       })
 
-      // Primero notificamos a n8n sobre el cambio de estado
-      const webhookResponse = await sendBotStatusWebhook(
+      await sendBotStatusWebhook(
         conversation.id,
         checked,
         conversation.phone_number
       )
       
-      console.log('Respuesta del webhook:', webhookResponse)
-      
-      // Luego actualizamos el estado en la base de datos
       await onToggleBot(checked)
-      
-      // El estado visual se actualizará automáticamente cuando Supabase
-      // notifique el cambio a través de la suscripción
     } catch (error) {
       console.error('Error toggling bot status:', error)
-      // Si hay un error, revertimos el estado del switch
-      const switchElement = document.querySelector('.switch-bot') as HTMLInputElement
-      if (switchElement) {
-        switchElement.checked = !checked
-      }
+      setLocalBotActive(!checked) // Revertir el estado local si hay error
     } finally {
       setIsTogglingBot(false)
     }
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="bg-white dark:bg-gray-dark p-4 border-b dark:border-gray-700">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-800">
+      <div className="bg-white dark:bg-gray-800 p-4 border-b dark:border-gray-700 shadow-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             {conversation.contact_name || conversation.phone_number}
           </h2>
           <div className="flex items-center gap-2">
             <span className={`text-sm ${
-              conversation.bot_active 
-                ? 'text-gray-500 dark:text-gray-400' 
+              localBotActive 
+                ? 'text-gray-600 dark:text-gray-300' 
                 : 'text-yellow-600 dark:text-yellow-500 font-medium'
             }`}>
-              {conversation.bot_active ? 'Bot activo' : 'Modo manual'}
+              {localBotActive ? 'Bot activo' : 'Modo manual'}
             </span>
             <Switch
-              checked={conversation.bot_active}
+              checked={localBotActive}
               onChange={handleBotToggle}
               disabled={isTogglingBot}
               className={`switch-bot ${
-                conversation.bot_active ? 'bg-secondary' : 'bg-yellow-500'
+                localBotActive ? 'bg-secondary' : 'bg-yellow-500'
               } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
                 isTogglingBot ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
               <span
                 className={`${
-                  conversation.bot_active ? 'translate-x-6' : 'translate-x-1'
+                  localBotActive ? 'translate-x-6' : 'translate-x-1'
                 } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
               />
             </Switch>
           </div>
         </div>
-        {!conversation.bot_active && (
-          <div className="mt-2 text-sm text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded border border-yellow-200 dark:border-yellow-800">
+        {!localBotActive && (
+          <div className="mt-2 text-sm text-yellow-600 dark:text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded border border-yellow-200 dark:border-yellow-800">
             <span className="font-medium">Bot desactivado</span> - Los mensajes serán manejados manualmente.
           </div>
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900">
         {messages.map((message) => (
           <MessageBubble
             key={message.id}
             message={message}
-            isBot={message.sender_type === 'bot'}
             senderType={message.sender_type}
           />
         ))}
         <div ref={messagesEndRef} />
       </div>
 
-      {!conversation.bot_active && (
-        <form onSubmit={handleSubmit} className="p-4 border-t dark:border-gray-700">
+      {!localBotActive && (
+        <form onSubmit={handleSubmit} className="p-4 border-t dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className="flex gap-2">
             <input
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Modo manual - Escribe tu respuesta..."
-              className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:border-primary dark:bg-gray-800 dark:text-white"
+              className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:border-primary dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             <button
               type="submit"

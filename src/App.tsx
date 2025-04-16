@@ -173,15 +173,8 @@ function App() {
         console.error('Webhook error:', response.statusText)
       }
 
-      // Actualizar el estado local del mensaje
-      setMessages((prev) => [
-        ...prev,
-        {
-          ...message,
-          id: Date.now().toString(),
-          created_at: new Date().toISOString(),
-        } as Message,
-      ])
+      // Eliminamos la actualización local del estado de mensajes
+      // ya que esto lo manejará la suscripción de Supabase
     } catch (err) {
       console.error('Error:', err)
     }
@@ -238,25 +231,38 @@ function App() {
 
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-      <header className="bg-[#004F4F] text-white py-2">
+      <header className="bg-[#004F4F] text-white py-2 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center px-4">
-          <h1 className="text-lg font-bold">Qualiver Chat</h1>
+          <div className="flex items-center gap-4">
+            <img 
+              src="https://static.wixstatic.com/media/77d344_ce2c8ee37a51485683726565cbe39512~mv2.png" 
+              alt="Qualiver Logo" 
+              className="h-8 w-auto"
+            />
+            <h1 className="text-lg font-bold">Qualiver Chat</h1>
+          </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+            className="p-2 rounded-lg hover:bg-white/10 transition-colors flex items-center gap-2"
             title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
           >
             {darkMode ? (
-              <SunIcon className="h-5 w-5" />
+              <>
+                <SunIcon className="h-5 w-5" />
+                <span className="text-sm">Modo claro</span>
+              </>
             ) : (
-              <MoonIcon className="h-5 w-5" />
+              <>
+                <MoonIcon className="h-5 w-5" />
+                <span className="text-sm">Modo oscuro</span>
+              </>
             )}
           </button>
         </div>
       </header>
 
-      <main className="flex-1 flex overflow-hidden">
-        <div className="w-80 flex-shrink-0 border-r dark:border-gray-800">
+      <main className="flex-1 flex overflow-hidden bg-gray-50 dark:bg-gray-900">
+        <div className="w-80 flex-shrink-0 border-r dark:border-gray-800 bg-white dark:bg-gray-800">
           <ConversationList
             conversations={conversations}
             selectedConversation={selectedConversation}
@@ -264,7 +270,7 @@ function App() {
           />
         </div>
 
-        <div className="flex-1 bg-gray-50 dark:bg-gray-900">
+        <div className="flex-1">
           {selectedConversation ? (
             <ConversationPanel
               conversation={selectedConversation}
