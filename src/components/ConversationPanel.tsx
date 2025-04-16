@@ -80,8 +80,16 @@ export const ConversationPanel = ({
       
       // Luego actualizamos el estado en la base de datos
       await onToggleBot(checked)
+      
+      // El estado visual se actualizará automáticamente cuando Supabase
+      // notifique el cambio a través de la suscripción
     } catch (error) {
       console.error('Error toggling bot status:', error)
+      // Si hay un error, revertimos el estado del switch
+      const switchElement = document.querySelector('.switch-bot') as HTMLInputElement
+      if (switchElement) {
+        switchElement.checked = !checked
+      }
     } finally {
       setIsTogglingBot(false)
     }
@@ -106,7 +114,7 @@ export const ConversationPanel = ({
               checked={conversation.bot_active}
               onChange={handleBotToggle}
               disabled={isTogglingBot}
-              className={`${
+              className={`switch-bot ${
                 conversation.bot_active ? 'bg-secondary' : 'bg-yellow-500'
               } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
                 isTogglingBot ? 'opacity-50 cursor-not-allowed' : ''
@@ -129,10 +137,11 @@ export const ConversationPanel = ({
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
-          <MessageBubble 
-            key={message.id} 
-            message={message} 
-            isBot={message.message_type === 'bot' || message.sender_type === 'bot'}
+          <MessageBubble
+            key={message.id}
+            message={message}
+            isBot={message.sender_type === 'bot'}
+            senderType={message.sender_type}
           />
         ))}
         <div ref={messagesEndRef} />

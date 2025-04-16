@@ -75,6 +75,9 @@ function App() {
                   : conv
               )
             )
+            if (selectedConversation?.id === payload.new.id) {
+              setSelectedConversation(payload.new as Conversation)
+            }
           }
         }
       )
@@ -142,15 +145,14 @@ function App() {
       const message = {
         conversation_id: selectedConversation.id,
         content,
-        message_type: 'user',
+        message_type: 'agent',
         status: 'sent',
-        bot_active: selectedConversation.bot_active,
       }
 
       const { error } = await supabase.from('messages').insert([message])
 
       if (error) {
-        throw error
+        console.error('Error inserting message:', error)
       }
 
       // Send webhook to n8n
@@ -168,11 +170,20 @@ function App() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to send webhook')
+        console.error('Webhook error:', response.statusText)
       }
+
+      // Actualizar el estado local del mensaje
+      setMessages((prev) => [
+        ...prev,
+        {
+          ...message,
+          id: Date.now().toString(),
+          created_at: new Date().toISOString(),
+        } as Message,
+      ])
     } catch (err) {
       console.error('Error:', err)
-      setError(err instanceof Error ? err.message : 'Error al enviar el mensaje')
     }
   }
 
