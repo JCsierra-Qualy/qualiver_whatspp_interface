@@ -25,8 +25,10 @@ function App() {
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark')
+      document.documentElement.style.colorScheme = 'dark'
     } else {
       document.documentElement.classList.remove('dark')
+      document.documentElement.style.colorScheme = 'light'
     }
     localStorage.setItem('darkMode', JSON.stringify(darkMode))
   }, [darkMode])
@@ -230,10 +232,10 @@ function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+    <div className={`h-screen flex flex-col ${darkMode ? 'dark' : ''}`}>
       <header className="bg-[#004F4F] text-white py-2 shadow-md">
-        <div className="max-w-7xl mx-auto flex justify-between items-center px-4">
-          <div className="flex items-center gap-4">
+        <div className="w-full px-4 flex justify-between items-center">
+          <div className="flex items-center gap-2">
             <img 
               src="https://static.wixstatic.com/media/77d344_ce2c8ee37a51485683726565cbe39512~mv2.png" 
               alt="Qualiver Logo" 
@@ -261,8 +263,8 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1 flex overflow-hidden bg-gray-50 dark:bg-gray-900">
-        <div className="w-80 flex-shrink-0 border-r dark:border-gray-800 bg-white dark:bg-gray-800">
+      <main className="flex-1 flex overflow-hidden">
+        <div className="w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800">
           <ConversationList
             conversations={conversations}
             selectedConversation={selectedConversation}
@@ -270,7 +272,7 @@ function App() {
           />
         </div>
 
-        <div className="flex-1">
+        <div className="flex-1 bg-gray-50 dark:bg-gray-900">
           {selectedConversation ? (
             <ConversationPanel
               conversation={selectedConversation}
