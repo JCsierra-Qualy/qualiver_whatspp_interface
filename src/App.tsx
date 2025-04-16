@@ -26,9 +26,11 @@ function App() {
     if (darkMode) {
       document.documentElement.classList.add('dark')
       document.documentElement.style.colorScheme = 'dark'
+      document.body.classList.add('dark:bg-gray-900')
     } else {
       document.documentElement.classList.remove('dark')
       document.documentElement.style.colorScheme = 'light'
+      document.body.classList.remove('dark:bg-gray-900')
     }
     localStorage.setItem('darkMode', JSON.stringify(darkMode))
   }, [darkMode])
@@ -232,7 +234,7 @@ function App() {
   }
 
   return (
-    <div className={`h-screen flex flex-col ${darkMode ? 'dark' : ''}`}>
+    <div className={`min-h-screen w-full flex flex-col bg-white dark:bg-gray-900 ${darkMode ? 'dark' : ''}`}>
       <header className="bg-[#004F4F] text-white py-2 shadow-md">
         <div className="w-full px-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -241,11 +243,11 @@ function App() {
               alt="Qualiver Logo" 
               className="h-8 w-auto"
             />
-            <h1 className="text-lg font-bold">Qualiver Chat</h1>
+            <h1 className="text-lg font-bold text-white">Qualiver Chat</h1>
           </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors flex items-center gap-2"
+            className="p-2 rounded-lg hover:bg-white/10 transition-colors flex items-center gap-2 text-white"
             title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
           >
             {darkMode ? (
@@ -264,7 +266,7 @@ function App() {
       </header>
 
       <main className="flex-1 flex overflow-hidden">
-        <div className="w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800">
+        <div className="w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <ConversationList
             conversations={conversations}
             selectedConversation={selectedConversation}
