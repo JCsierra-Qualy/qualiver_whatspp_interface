@@ -4,6 +4,7 @@ import { MessageBubble } from './MessageBubble'
 import { supabase } from '../lib/supabase'
 import { Switch } from '@headlessui/react'
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid'
+import { sendBotStatusWebhook } from '../lib/webhooks'
 
 interface ConversationPanelProps {
   conversation: Conversation
@@ -21,6 +22,7 @@ export const ConversationPanel = ({
   const [newMessage, setNewMessage] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [isSending, setIsSending] = useState(false)
+  const [isTogglingBot, setIsTogglingBot] = useState(false)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -45,6 +47,27 @@ export const ConversationPanel = ({
     }
   }
 
+  const handleBotToggle = async (checked: boolean) => {
+    if (isTogglingBot) return
+    setIsTogglingBot(true)
+
+    try {
+      // Primero notificamos a n8n sobre el cambio de estado
+      await sendBotStatusWebhook(
+        conversation.id,
+        checked,
+        conversation.phone_number
+      )
+      
+      // Luego actualizamos el estado en la base de datos
+      await onToggleBot(checked)
+    } catch (error) {
+      console.error('Error toggling bot status:', error)
+    } finally {
+      setIsTogglingBot(false)
+    }
+  }
+
   return (
     <div className="flex flex-col h-full">
       <div className="bg-white dark:bg-gray-dark p-4 border-b dark:border-gray-700">
@@ -54,14 +77,17 @@ export const ConversationPanel = ({
           </h2>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              Bot activo
+              {conversation.bot_active ? 'Bot activo' : 'Modo manual'}
             </span>
             <Switch
               checked={conversation.bot_active}
-              onChange={(checked) => onToggleBot(checked)}
+              onChange={handleBotToggle}
+              disabled={isTogglingBot}
               className={`${
                 conversation.bot_active ? 'bg-secondary' : 'bg-gray-200'
-              } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none`}
+              } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                isTogglingBot ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <span
                 className={`${
@@ -71,6 +97,11 @@ export const ConversationPanel = ({
             </Switch>
           </div>
         </div>
+        {!conversation.bot_active && (
+          <div className="mt-2 text-sm text-yellow-600 bg-yellow-50 p-2 rounded">
+            Bot desactivado. Los mensajes serán manejados manualmente.
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -90,7 +121,9 @@ export const ConversationPanel = ({
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Escribe un mensaje..."
+            placeholder={conversation.bot_active 
+              ? "Escribe un mensaje..." 
+              : "Modo manual - Escribe tu respuesta..."}
             className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:border-primary dark:bg-gray-800 dark:text-white"
           />
           <button
