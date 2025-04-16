@@ -189,9 +189,8 @@ function App() {
         throw error
       }
 
-      setSelectedConversation((prev) =>
-        prev ? { ...prev, bot_active: active } : undefined
-      )
+      // No actualizamos el estado local aquí, esperamos la notificación de Supabase
+      // a través de la suscripción
     } catch (err) {
       console.error('Error:', err)
       setError(err instanceof Error ? err.message : 'Error al cambiar el estado del bot')
