@@ -59,23 +59,24 @@ export const ConversationPanel = ({
   const handleBotToggle = async (checked: boolean) => {
     if (isTogglingBot) return
 
-    // Si se está desactivando el bot, pedir confirmación
-    if (!checked) {
-      const confirmed = window.confirm(
-        '¿Estás seguro de que deseas desactivar el bot? Los mensajes serán manejados manualmente.'
-      )
-      if (!confirmed) return
-    }
-
     setIsTogglingBot(true)
 
     try {
+      console.log('Enviando webhook de estado del bot:', {
+        conversationId: conversation.id,
+        isActive: checked,
+        phoneNumber: conversation.phone_number,
+        webhookUrl: import.meta.env.VITE_N8N_BOT_STATUS_WEBHOOK_URL
+      })
+
       // Primero notificamos a n8n sobre el cambio de estado
-      await sendBotStatusWebhook(
+      const webhookResponse = await sendBotStatusWebhook(
         conversation.id,
         checked,
         conversation.phone_number
       )
+      
+      console.log('Respuesta del webhook:', webhookResponse)
       
       // Luego actualizamos el estado en la base de datos
       await onToggleBot(checked)

@@ -10,10 +10,12 @@ export const sendBotStatusWebhook = async (
   }
 
   try {
+    console.log('Intentando enviar webhook a:', webhookUrl)
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify({
         event: 'bot_status_changed',
@@ -25,7 +27,13 @@ export const sendBotStatusWebhook = async (
     })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      const errorText = await response.text()
+      console.error('Error en la respuesta del webhook:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText
+      })
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
     }
 
     return await response.json()
@@ -48,10 +56,12 @@ export const sendMessageWebhook = async (
   }
 
   try {
+    console.log('Intentando enviar webhook a:', webhookUrl)
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify({
         event: 'new_message',
@@ -64,7 +74,13 @@ export const sendMessageWebhook = async (
     })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      const errorText = await response.text()
+      console.error('Error en la respuesta del webhook:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText
+      })
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
     }
 
     return await response.json()
