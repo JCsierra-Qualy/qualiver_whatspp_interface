@@ -4,7 +4,7 @@ import { MessageBubble } from './MessageBubble'
 import { supabase } from '../lib/supabase'
 import { Switch } from '@headlessui/react'
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid'
-import { sendBotStatusWebhook } from '../lib/webhooks'
+import { sendBotStatusWebhook, sendMessageWebhook } from '../lib/webhooks'
 
 interface ConversationPanelProps {
   conversation: Conversation
@@ -38,6 +38,15 @@ export const ConversationPanel = ({
 
     setIsSending(true)
     try {
+      // Primero enviamos el mensaje a través del webhook
+      await sendMessageWebhook(
+        conversation.id,
+        newMessage,
+        conversation.phone_number,
+        !conversation.bot_active // true si está en modo manual
+      )
+      
+      // Luego actualizamos la base de datos
       await onSendMessage(newMessage)
       setNewMessage('')
     } catch (error) {
