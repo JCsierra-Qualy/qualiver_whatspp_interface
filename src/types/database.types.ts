@@ -9,6 +9,7 @@ export interface Message {
   message_status?: 'sent' | 'delivered' | 'failed'
   phone_number: string
   sender_type: 'user' | 'bot'
+  bot_active: boolean
 }
 
 export interface Conversation {

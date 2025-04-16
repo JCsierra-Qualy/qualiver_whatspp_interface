@@ -7,11 +7,15 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 18.19.0
+      - key: PORT
+        value: 3000
       - key: VITE_SUPABASE_URL
         sync: false
       - key: VITE_SUPABASE_ANON_KEY
         sync: false
-      - key: VITE_N8N_WEBHOOK_URL
+      - key: VITE_N8N_BOT_STATUS_WEBHOOK_URL
+        sync: false
+      - key: VITE_N8N_MESSAGE_WEBHOOK_URL
         sync: false
     healthCheckPath: /
     autoDeploy: true

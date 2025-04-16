@@ -58,6 +58,15 @@ export const ConversationPanel = ({
 
   const handleBotToggle = async (checked: boolean) => {
     if (isTogglingBot) return
+
+    // Si se está desactivando el bot, pedir confirmación
+    if (!checked) {
+      const confirmed = window.confirm(
+        '¿Estás seguro de que deseas desactivar el bot? Los mensajes serán manejados manualmente.'
+      )
+      if (!confirmed) return
+    }
+
     setIsTogglingBot(true)
 
     try {
@@ -85,7 +94,11 @@ export const ConversationPanel = ({
             {conversation.contact_name || conversation.phone_number}
           </h2>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className={`text-sm ${
+              conversation.bot_active 
+                ? 'text-gray-500 dark:text-gray-400' 
+                : 'text-yellow-600 dark:text-yellow-500 font-medium'
+            }`}>
               {conversation.bot_active ? 'Bot activo' : 'Modo manual'}
             </span>
             <Switch
@@ -93,7 +106,7 @@ export const ConversationPanel = ({
               onChange={handleBotToggle}
               disabled={isTogglingBot}
               className={`${
-                conversation.bot_active ? 'bg-secondary' : 'bg-gray-200'
+                conversation.bot_active ? 'bg-secondary' : 'bg-yellow-500'
               } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
                 isTogglingBot ? 'opacity-50 cursor-not-allowed' : ''
               }`}
@@ -107,8 +120,8 @@ export const ConversationPanel = ({
           </div>
         </div>
         {!conversation.bot_active && (
-          <div className="mt-2 text-sm text-yellow-600 bg-yellow-50 p-2 rounded">
-            Bot desactivado. Los mensajes serán manejados manualmente.
+          <div className="mt-2 text-sm text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded border border-yellow-200 dark:border-yellow-800">
+            <span className="font-medium">Bot desactivado</span> - Los mensajes serán manejados manualmente.
           </div>
         )}
       </div>
@@ -124,26 +137,26 @@ export const ConversationPanel = ({
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 border-t dark:border-gray-700">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder={conversation.bot_active 
-              ? "Escribe un mensaje..." 
-              : "Modo manual - Escribe tu respuesta..."}
-            className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:border-primary dark:bg-gray-800 dark:text-white"
-          />
-          <button
-            type="submit"
-            disabled={isSending || !newMessage.trim()}
-            className="bg-[#004F4F] text-white rounded-lg px-4 py-2 hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <PaperAirplaneIcon className="h-5 w-5" />
-          </button>
-        </div>
-      </form>
+      {!conversation.bot_active && (
+        <form onSubmit={handleSubmit} className="p-4 border-t dark:border-gray-700">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Modo manual - Escribe tu respuesta..."
+              className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 p-2 focus:outline-none focus:border-primary dark:bg-gray-800 dark:text-white"
+            />
+            <button
+              type="submit"
+              disabled={isSending || !newMessage.trim()}
+              className="bg-[#004F4F] text-white rounded-lg px-4 py-2 hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <PaperAirplaneIcon className="h-5 w-5" />
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   )
 } 

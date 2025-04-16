@@ -28,7 +28,7 @@ export const MessageBubble = ({ message, isBot }: MessageBubbleProps) => {
           isBot
             ? 'bg-[#004F4F] text-white rounded-br-none'
             : 'bg-gray-light text-gray-dark rounded-bl-none'
-        }`}
+        } ${!message.bot_active && message.message_type === 'user' ? 'border-2 border-yellow-500' : ''}`}
       >
         <div className="flex flex-col">
           <div className="break-words whitespace-pre-wrap">{message.message}</div>
@@ -53,7 +53,7 @@ export const MessageBubble = ({ message, isBot }: MessageBubbleProps) => {
         </div>
         
         {!message.bot_active && message.message_type === 'user' && (
-          <div className="text-xs mt-1 opacity-75">
+          <div className="text-xs mt-1 text-yellow-600 dark:text-yellow-500 font-medium">
             Modo manual
           </div>
         )}
