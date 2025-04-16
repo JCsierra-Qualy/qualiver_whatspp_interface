@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: qualiver-whatsapp-interface
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run preview
+    envVars:
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_N8N_WEBHOOK_URL
+        sync: false
+    healthCheckPath: /
+    autoDeploy: true 
