@@ -44,6 +44,9 @@ function App() {
           .select('*')
           .order('last_message_at', { ascending: false })
 
+        console.log('[SUPABASE] conversations data:', data)
+        console.log('[SUPABASE] conversations error:', error)
+
         if (error) {
           throw error
         }
@@ -103,6 +106,9 @@ function App() {
           .select('*')
           .eq('conversation_id', selectedConversation.id)
           .order('created_at', { ascending: true })
+
+        console.log('[SUPABASE] messages data:', data)
+        console.log('[SUPABASE] messages error:', error)
 
         if (error) {
           throw error
